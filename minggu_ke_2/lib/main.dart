@@ -9,7 +9,7 @@ void main() => runApp(MaterialApp(
     ),
     body: Center(
       child: Text(
-        "ini aplikasi mobile pertama saya",
+        "ini aplikasi mobile pertama saya, nama saya Algof Kristian Zega",
         style: TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
