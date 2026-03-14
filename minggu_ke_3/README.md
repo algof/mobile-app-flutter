@@ -19,27 +19,47 @@ samples, guidance on mobile development, and a full API reference.
 ## Widget Tree
 
 ```txt
-MaterialApp
-└── MyHomePage
-    └── Scaffold
-        ├── AppBar
-        │   └── Text
-        └── Column
-            ├── AspectRatio
-            │   └── Container
-            │       └── Center
-            │           └── Image.network
-            ├── Container
-            │   └── Text
-            └── Container
-                └── Row
-                    ├── Column
-                    │   ├── Icon
-                    │   └── Text
-                    ├── Column
-                    │   ├── Icon
-                    │   └── Text
-                    └── Column
-                        ├── Icon
-                        └── Text
+runApp
+└── MyApp
+    └── MaterialApp
+        ├── title: "Tugas Minggu ke-3"
+        ├── theme: ThemeData
+        │   └── ColorScheme.fromSeed
+        └── home
+            └── MyHomePage
+                └── Scaffold
+                    ├── AppBar
+                    │   └── Text("My First App")
+                    │
+                    └── Body
+                        └── Column
+                            ├── AspectRatio
+                            │   └── Container
+                            │       └── Center
+                            │           └── Image.network
+                            │
+                            ├── Container
+                            │   └── Text("What image is that?")
+                            │
+                            ├── Container
+                            │   └── Row
+                            │       ├── Column
+                            │       │   ├── Icon(Icons.food_bank)
+                            │       │   └── Text("Food")
+                            │       │
+                            │       ├── Column
+                            │       │   ├── Icon(Icons.terrain)
+                            │       │   └── Text("Scenery")
+                            │       │
+                            │       └── Column
+                            │           ├── Icon(Icons.people)
+                            │           └── Text("People")
+                            │
+                            └── CounterCard (StatefulWidget)
+                                └── Container
+                                    └── Row
+                                        ├── Text("Counter here: $_counter")
+                                        └── Container
+                                            └── IconButton
+                                                └── Icon(Icons.add)
 ```
