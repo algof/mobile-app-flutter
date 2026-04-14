@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
 
 import 'firestore.dart';
 
@@ -15,7 +14,10 @@ class _HomePageState extends State<HomePage> {
   final titleTextController = TextEditingController();
   final contentTextController = TextEditingController();
   final labelTextController = TextEditingController();
+
   DateTime? selectedDate;
+
+  final FirestoreService firestoreService = FirestoreService();
 
   Future<void> pickDate() async {
     DateTime? picked = await showDatePicker(
@@ -32,16 +34,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  final FirestoreService firestoreService = FirestoreService();
-
-  void openNoteBox({String? docId, String? existingTitle, String? existingNote, String? existingLabel, DateTime? existingDate}) async {
+  void openNoteBox({
+    String? docId,
+    String? existingTitle,
+    String? existingNote,
+    String? existingLabel,
+    DateTime? existingDate,
+  }) {
     if (docId != null) {
-
       titleTextController.text = existingTitle ?? '';
       contentTextController.text = existingNote ?? '';
       labelTextController.text = existingLabel ?? '';
       selectedDate = existingDate;
-
     }
 
     showDialog(
@@ -50,101 +54,78 @@ class _HomePageState extends State<HomePage> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: Text(docId == null ? "Create new Note" : "Edit Note"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    decoration: InputDecoration(labelText: "Title"),
-                    controller: titleTextController,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Content"),
-                    controller: contentTextController,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Label"),
-                    controller: labelTextController,
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+              title: Text(docId == null ? "Create Note" : "Edit Note"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleTextController,
+                      decoration: const InputDecoration(labelText: "Title"),
+                    ),
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: contentTextController,
+                      decoration: const InputDecoration(labelText: "Content"),
+                    ),
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: labelTextController,
+                      decoration: const InputDecoration(labelText: "Label"),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // DATE PICKER UI
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Date",
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const SizedBox(height: 6),
+                        const SizedBox(height: 6),
 
-                      InkWell(
-                        onTap: () async {
-                          DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
+                        InkWell(
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
 
-                          if (picked != null) {
-                            setStateDialog(() {
-                              selectedDate = picked;
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                selectedDate == null
-                                    ? "Select date"
-                                    : "${selectedDate!.day.toString().padLeft(2, '0')}/"
-                                    "${selectedDate!.month.toString().padLeft(2, '0')}/"
-                                    "${selectedDate!.year}",
-                                style: TextStyle(
-                                  color: selectedDate == null ? Colors.grey : Colors.black,
+                            if (picked != null) {
+                              setStateDialog(() {
+                                selectedDate = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  selectedDate == null
+                                      ? "Select date"
+                                      : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
                                 ),
-                              ),
-                              const Icon(Icons.calendar_today, size: 18),
-                            ],
+                                const Icon(Icons.calendar_today, size: 18),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  // TextButton(
-                  //   onPressed: () async {
-                  //     DateTime? picked = await showDatePicker(
-                  //       context: context,
-                  //       initialDate: DateTime.now(),
-                  //       firstDate: DateTime(2000),
-                  //       lastDate: DateTime(2100),
-                  //     );
-                  //
-                  //     if (picked != null) {
-                  //       setStateDialog(() {
-                  //         selectedDate = picked;
-                  //       });
-                  //     }
-                  //   },
-                  //   child: Text(
-                  //     selectedDate == null
-                  //         ? "Pick Date"
-                  //         : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                  //   ),
-                  // ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 MaterialButton(
@@ -162,9 +143,10 @@ class _HomePageState extends State<HomePage> {
                         titleTextController.text,
                         contentTextController.text,
                         labelTextController.text,
-                        selectedDate ?? existingDate ?? DateTime.now()
+                        selectedDate ?? DateTime.now(),
                       );
                     }
+
                     titleTextController.clear();
                     contentTextController.clear();
                     labelTextController.clear();
@@ -176,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -185,78 +167,117 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Notes")),
+      appBar: AppBar(title: const Text("Notes")),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
             selectedDate = null;
           });
+          titleTextController.clear();
+          contentTextController.clear();
+          labelTextController.clear();
           openNoteBox();
         },
         child: const Icon(Icons.add),
       ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: firestoreService.getNotes(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List notesList = snapshot.data!.docs;
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            return ListView.builder(
-              itemCount: notesList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot document = notesList[index];
-                String docId = document.id;
+          List notesList = snapshot.data!.docs;
 
-                Map<String, dynamic> data =
-                document.data() as Map<String, dynamic>;
-                String noteTitle = data['title'];
-                String noteContent = data['content'];
-                String noteLabel = data['label'];
-                DateTime noteDate = (data['selectedDate'] as Timestamp).toDate();
+          return GridView.builder(
+            padding: const EdgeInsets.all(10),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: notesList.length,
+            itemBuilder: (context, index) {
+              DocumentSnapshot document = notesList[index];
+              String docId = document.id;
 
-                return ListTile(
-                  title: Text(noteTitle),
-                  subtitle: Column(
+              Map<String, dynamic> data =
+              document.data() as Map<String, dynamic>;
+
+              String noteTitle = data['title'];
+              String noteContent = data['content'];
+              String noteLabel = data['label'];
+
+              DateTime noteDate =
+              (data['selectedDate'] as Timestamp).toDate();
+
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        noteTitle,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
                       Text(noteContent),
                       Text(noteLabel),
+
+                      const Spacer(),
+
                       Text(
                         "${noteDate.day.toString().padLeft(2, '0')}/"
                             "${noteDate.month.toString().padLeft(2, '0')}/"
                             "${noteDate.year}",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 18),
+                            onPressed: () {
+                              openNoteBox(
+                                docId: docId,
+                                existingTitle: noteTitle,
+                                existingNote: noteContent,
+                                existingLabel: noteLabel,
+                                existingDate: noteDate,
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 18),
+                            onPressed: () {
+                              firestoreService.deleteNote(docId);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          openNoteBox(
-                            docId: docId,
-                            existingNote: noteContent,
-                            existingTitle: noteTitle,
-                            existingLabel: noteLabel,
-                            existingDate: noteDate,
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          firestoreService.deleteNote(docId);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          } else {
-            return const Text("No data");
-          }
+                ),
+              );
+            },
+          );
         },
       ),
     );
