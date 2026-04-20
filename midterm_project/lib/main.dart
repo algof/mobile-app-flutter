@@ -1,4 +1,5 @@
-import 'package:midterm_project/screens/home.dart';
+// import 'package:midterm_project/screens/home.dart';
+import 'package:midterm_project/screens/homepage.dart';
 import 'package:midterm_project/screens/login.dart';
 import 'package:midterm_project/screens/register.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(initialRoute: 'login', routes: {
-      'home': (context) => const HomeScreen(),
+      'home': (context) => const HomePage(),
       'login': (context) => const LoginScreen(),
       'register': (context) => const RegisterScreen(),
     });
