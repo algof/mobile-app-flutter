@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:midterm_project/firestore.dart';
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -9,6 +11,8 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final FirestoreService firestoreService = FirestoreService();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -36,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      firestoreService.setUser(_emailController.text, _passwordController.text);
       navigateLogin();
     } on FirebaseAuthException catch (e) {
       setState(() {

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:midterm_project/firestore.dart';
+import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget{
   const HomePage({super.key});
@@ -73,10 +74,10 @@ class _HomePageState extends State<HomePage> {
             MaterialButton(
               onPressed: () {
                 if (docId == null){
-                  firestoreService.addNote(nameTextController.text, companyTextController.text, phoneTextController.text, selectedStatus);
+                  firestoreService.addClient(nameTextController.text, companyTextController.text, phoneTextController.text, selectedStatus);
                 }
                 else{
-                  firestoreService.updateNote(docId, nameTextController.text, companyTextController.text, phoneTextController.text, selectedStatus);
+                  firestoreService.updateClient(docId, nameTextController.text, companyTextController.text, phoneTextController.text, selectedStatus);
                 }
 
                 nameTextController.clear();
@@ -94,12 +95,54 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void logout(context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacementNamed(context, 'login');
+  }
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
         title: Text("List Client"),
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+              onPressed: () {
+                final user = FirebaseAuth.instance.currentUser;
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Container(
+                      height: 200,
+                      color: Colors.blueAccent,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              "Logged in as\n${user?.email ?? '-'}",
+                              style: TextStyle(color: Colors.white.withValues(alpha: 1.0))
+                            ),
+                            ElevatedButton(
+                              child: Text('Log out'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                logout(context);
+                              }
+                            )
+                          ],
+                        ),
+                      )
+                    );
+                  }
+                );
+              },
+              icon: Icon(Icons.account_circle)
+          )
+        ],
+        backgroundColor: Colors.blueAccent,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -108,7 +151,7 @@ class _HomePageState extends State<HomePage> {
         child: const Icon(Icons.add),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: firestoreService.getNotes(), 
+        stream: firestoreService.getClient(), 
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -151,7 +194,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     IconButton(
                       onPressed: () {
-                        firestoreService.deleteNote(docId);
+                        firestoreService.deleteClient(docId);
                       },
                        icon: const Icon(Icons.delete)
                       )
