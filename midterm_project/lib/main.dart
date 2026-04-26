@@ -1,4 +1,3 @@
-// import 'package:midterm_project/screens/home.dart';
 import 'package:midterm_project/screens/homepage.dart';
 import 'package:midterm_project/screens/login.dart';
 import 'package:midterm_project/screens/register.dart';
