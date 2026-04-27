@@ -1,20 +1,26 @@
 import 'package:midterm_project/screens/homepage.dart';
-import 'package:midterm_project/screens/login.dart';
 import 'package:midterm_project/screens/register.dart';
-import 'package:flutter/material.dart';
+import 'package:midterm_project/screens/login.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:gal/gal.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp(camera: firstCamera));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final CameraDescription camera;
+
+  const MyApp({super.key, required this.camera});
 
   @override
   Widget build(BuildContext context) {
