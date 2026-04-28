@@ -1,3 +1,4 @@
+import 'package:midterm_project/services/notification_service.dart';
 import 'package:midterm_project/screens/camera_preview.dart';
 import 'package:midterm_project/services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,8 +25,8 @@ class _HomePageState extends State<HomePage> {
   final companyTextController = TextEditingController();
   final phoneTextController = TextEditingController();
   String? selectedStatus;
-  File? _selectedImage; 
-  String? _selectedImagePath; 
+  File? _selectedImage;
+  String? _selectedImagePath;
   final ImagePicker _picker = ImagePicker();
   bool _isSaving = false;
 
@@ -240,6 +241,7 @@ class _HomePageState extends State<HomePage> {
                                   existingPhotoPath: _selectedImagePath,
                                   newPhotoPath: photoPath,
                                 );
+                                await NotificationService.showPhotoSavedNotification();
                               } catch (e) {
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -275,6 +277,9 @@ class _HomePageState extends State<HomePage> {
                                   selectedStatus ?? '',
                                   photoPath ?? '',
                                 );
+                                await NotificationService.showClientAddedNotification(
+                                  nameTextController.text,
+                                );
                               } else {
                                 // Edit mode
                                 await firestoreService.updateClient(
@@ -285,6 +290,9 @@ class _HomePageState extends State<HomePage> {
                                   selectedStatus ?? '',
                                   _selectedImage != null ? photoPath : null,
                                 );
+                                await NotificationService.showClientUpdatedNotification(
+                                  nameTextController.text,
+                                );
                               }
 
                               if (!mounted) return;
@@ -292,22 +300,25 @@ class _HomePageState extends State<HomePage> {
                               _clearControllers();
 
                               // Show success message
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    docId == null
-                                        ? 'Client berhasil ditambahkan'
-                                        : 'Client berhasil diperbarui',
-                                  ),
-                                ),
-                              );
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text(
+                              //       docId == null
+                              //           ? 'Client berhasil ditambahkan'
+                              //           : 'Client berhasil diperbarui',
+                              //     ),
+                              //   ),
+                              // );
                             } catch (e) {
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error saving client: $e'),
-                                ),
+                              await NotificationService.showErrorNotification(
+                                'Error saving client: $e',
                               );
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text('Error saving client: $e'),
+                              //   ),
+                              // );
                             }
                           } finally {
                             if (mounted) {
@@ -347,12 +358,12 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => CameraPreviewScreen(camera: cameras.first),
         ),
       );
-     
+
       if (result != null && result is String) {
         setState(() {
           _selectedImage = File(result);
         });
-        
+
         onImagePicked(File(result));
       }
     }
@@ -489,8 +500,9 @@ class _HomePageState extends State<HomePage> {
                       icon: const Icon(Icons.edit),
                     ),
                     IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         firestoreService.deleteClient(docId);
+                        await NotificationService.showClientDeletedNotification(noteName);
                       },
                       icon: const Icon(Icons.delete),
                     ),

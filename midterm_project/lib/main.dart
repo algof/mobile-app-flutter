@@ -1,3 +1,4 @@
+import 'package:midterm_project/services/notification_service.dart'; 
 import 'package:midterm_project/screens/camera_preview.dart';
 import 'package:midterm_project/screens/register.dart';
 import 'package:midterm_project/screens/login.dart';
@@ -11,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
   final firstCamera = cameras.first;
+  await NotificationService.initializeNotification();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
