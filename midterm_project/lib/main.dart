@@ -1,11 +1,12 @@
-import 'package:midterm_project/screens/homepage.dart';
+import 'package:midterm_project/screens/camera_preview.dart';
 import 'package:midterm_project/screens/register.dart';
 import 'package:midterm_project/screens/login.dart';
+import 'package:midterm_project/screens/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:gal/gal.dart';
 import 'firebase_options.dart';
+import 'package:gal/gal.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       'home': (context) => const HomePage(),
       'login': (context) => const LoginScreen(),
       'register': (context) => const RegisterScreen(),
+      'camera': (context) => CameraPreviewScreen(camera: camera),
     });
   }
 }

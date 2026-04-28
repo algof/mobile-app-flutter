@@ -100,6 +100,11 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushReplacementNamed(context, 'login');
   }
 
+  void navigateCameraPreview () {
+    if (!context.mounted) return;
+    Navigator.pushReplacementNamed(context, 'camera');
+  }
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -146,7 +151,8 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          openNoteBox(existingStatus: '');
+          // openNoteBox(existingStatus: '');
+          navigateCameraPreview();
         },
         child: const Icon(Icons.add),
       ),
@@ -204,9 +210,6 @@ class _HomePageState extends State<HomePage> {
             }
           );
         }
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.blueAccent
       ),
     );
   }
