@@ -166,7 +166,9 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: "Status"),
-                  initialValue: (selectedStatus ?? '').isEmpty ? null : selectedStatus,
+                  initialValue: (selectedStatus ?? '').isEmpty
+                      ? null
+                      : selectedStatus,
                   items: ['Lead', 'Prospect', 'Active', 'Finished'].map((
                     status,
                   ) {
@@ -218,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                     nameTextController.text,
                     companyTextController.text,
                     phoneTextController.text,
-                    selectedStatus,
+                    selectedStatus ?? '',
                     photoPath ?? '',
                   );
                 } else {
@@ -227,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                     nameTextController.text,
                     companyTextController.text,
                     phoneTextController.text,
-                    selectedStatus,
+                    selectedStatus ?? '',
                     _selectedImage != null ? photoPath : null,
                   );
                 }
@@ -341,9 +343,13 @@ class _HomePageState extends State<HomePage> {
               String noteCompany = data['company'];
               String notePhone = data['phone'];
               String noteStatus = data['status'];
+              String notePhotoPath = data['profilePath'] ?? '';
 
               return ListTile(
-                leading: const Icon(Icons.person),
+                leading:
+                    notePhotoPath.isNotEmpty && File(notePhotoPath).existsSync()
+                    ? Image.file(File(notePhotoPath), fit: BoxFit.cover)
+                    : Icon(Icons.person),
                 title: Text(noteName),
                 subtitle: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -366,6 +372,7 @@ class _HomePageState extends State<HomePage> {
                           clientCompany: noteCompany,
                           clientPhone: notePhone,
                           clientStatus: noteStatus,
+                          existingPhotoPath: notePhotoPath,
                         );
                       },
                       icon: const Icon(Icons.edit),

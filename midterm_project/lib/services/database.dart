@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 class FirestoreService {
-
   final logger = Logger();
 
   String hashString(String input) {
@@ -49,7 +48,8 @@ class FirestoreService {
   Future<String> saveClientPhoto(String clientId, File imageFile) async {
     try {
       final photoDir = await getClientPhotosDirectory();
-      final fileName = '${clientId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileName =
+          '${clientId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final photoPath = '$photoDir/$fileName';
 
       // Copy file ke local directory
@@ -88,7 +88,7 @@ class FirestoreService {
     return users.doc(uid).set({
       'email': email,
       'password': hashString(password),
-      'role': 'user'
+      'role': 'user',
     });
   }
 
@@ -98,7 +98,13 @@ class FirestoreService {
     return clients.orderBy('createdAt', descending: true).snapshots();
   }
 
-  Future<void> addClient(String name, String company, String phone, String status, String profilePath) {
+  Future<void> addClient(
+    String name,
+    String company,
+    String phone,
+    String status,
+    String profilePath,
+  ) {
     return clients.add({
       'name': name,
       'company': company,
@@ -106,23 +112,34 @@ class FirestoreService {
       'status': status,
       'profilePath': profilePath,
       'createdAt': Timestamp.now(),
-      'updatedAt': Timestamp.now()
+      'updatedAt': Timestamp.now(),
     });
   }
 
-  Future<void> updateClient(String id, String name, String company, String phone, String status, String? profilePath) {
-    return clients.doc(id).update({
+  Future<void> updateClient(
+    String id,
+    String name,
+    String company,
+    String phone,
+    String status,
+    String? profilePath,
+  ) {
+    final updates = {
       'name': name,
       'company': company,
       'phone': phone,
       'status': status,
-      'profilePath': ?profilePath,
-      'updatedAt': Timestamp.now()
-    });
+      'updatedAt': Timestamp.now(),
+    };
+
+    if (profilePath != null) {
+      updates['profilePath'] = profilePath;
+    }
+
+    return clients.doc(id).update(updates);
   }
 
-  Future<void> deleteClient(String id) async{
-
+  Future<void> deleteClient(String id) async {
     var clientDoc = await clients.doc(id).get();
     var profilePath = clientDoc.data()?['profilePath'];
     await deleteClientPhoto(profilePath);
@@ -134,9 +151,9 @@ class FirestoreService {
 
   // 🔄 stream documents per client
   Stream<QuerySnapshot> getDocuments(String clientId) {
-    return documents(clientId)
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+    return documents(
+      clientId,
+    ).orderBy('createdAt', descending: true).snapshots();
   }
 
   // ➕ add document
@@ -150,10 +167,9 @@ class FirestoreService {
 
   // ✏️ update document
   Future<void> updateDocument(String clientId, String docId, String title) {
-    return documents(clientId).doc(docId).update({
-      'title': title,
-      'updatedAt': Timestamp.now(),
-    });
+    return documents(
+      clientId,
+    ).doc(docId).update({'title': title, 'updatedAt': Timestamp.now()});
   }
 
   // ❌ delete document
