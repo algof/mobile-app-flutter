@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   File? _selectedImage; // Untuk menyimpan foto baru yang dipilih
   String? _selectedImagePath; // Untuk menyimpan path foto lama saat edit
   final ImagePicker _picker = ImagePicker();
+  bool _isSaving = false;
 
   void _clearControllers() {
     nameTextController.clear();
@@ -195,50 +196,112 @@ class _HomePageState extends State<HomePage> {
               child: Text('Batal'),
             ),
             MaterialButton(
-              onPressed: () async {
-                String? photoPath = _selectedImagePath;
+              onPressed: _isSaving
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isSaving = true;
+                      });
 
-                // Jika user pilih foto baru
-                if (_selectedImage != null) {
-                  try {
-                    // Save foto ke local storage
-                    photoPath = await firestoreService.saveClientPhoto(
-                      docId ?? 'new_client',
-                      _selectedImage!,
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error saving photo: $e')),
-                    );
-                    return; // Jangan lanjut save client
-                  }
-                }
+                      try {
+                        String? photoPath = _selectedImagePath;
 
-                if (docId == null) {
-                  await firestoreService.addClient(
-                    nameTextController.text,
-                    companyTextController.text,
-                    phoneTextController.text,
-                    selectedStatus ?? '',
-                    photoPath ?? '',
-                  );
-                } else {
-                  await firestoreService.updateClient(
-                    docId,
-                    nameTextController.text,
-                    companyTextController.text,
-                    phoneTextController.text,
-                    selectedStatus ?? '',
-                    _selectedImage != null ? photoPath : null,
-                  );
-                }
+                        // Jika user pilih foto baru
+                        if (_selectedImage != null) {
+                          try {
+                            // Save foto ke local storage
+                            photoPath = await firestoreService.saveClientPhoto(
+                              docId ?? 'new_client',
+                              _selectedImage!,
+                            );
 
-                if (!mounted) return;
-                Navigator.pop(context);
-                _clearControllers();
-              },
-              child: Text(docId == null ? "Create" : "Update"),
+                            // ✅ BARU: Handle photo replacement (delete old photo if edit mode)
+                            photoPath = await handlePhotoReplacement(
+                              isEditMode: docId != null,
+                              selectedImage: _selectedImage,
+                              existingPhotoPath: _selectedImagePath,
+                              newPhotoPath: photoPath,
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error saving photo: $e')),
+                            );
+                            return; // Jangan lanjut save client
+                          }
+                        }
+
+                        // Validasi input
+                        if (nameTextController.text.isEmpty ||
+                            companyTextController.text.isEmpty ||
+                            phoneTextController.text.isEmpty ||
+                            (selectedStatus ?? '').isEmpty) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Semua field harus diisi'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          if (docId == null) {
+                            // Create mode
+                            await firestoreService.addClient(
+                              nameTextController.text,
+                              companyTextController.text,
+                              phoneTextController.text,
+                              selectedStatus ?? '',
+                              photoPath ?? '',
+                            );
+                          } else {
+                            // Edit mode
+                            await firestoreService.updateClient(
+                              docId,
+                              nameTextController.text,
+                              companyTextController.text,
+                              phoneTextController.text,
+                              selectedStatus ?? '',
+                              _selectedImage != null ? photoPath : null,
+                            );
+                          }
+
+                          if (!mounted) return;
+                          Navigator.pop(context);
+                          _clearControllers();
+
+                          // Show success message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                docId == null
+                                    ? 'Client berhasil ditambahkan'
+                                    : 'Client berhasil diperbarui',
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error saving client: $e')),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isSaving = false;
+                          });
+                        }
+                      }
+                    },
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(docId == null ? "Create" : "Update"),
             ),
           ],
         );
@@ -268,6 +331,29 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
+  }
+
+  Future<String?> handlePhotoReplacement({
+    required bool isEditMode,
+    required File? selectedImage,
+    required String? existingPhotoPath,
+    required String? newPhotoPath,
+  }) async {
+    if (!isEditMode) {
+      return newPhotoPath;
+    }
+
+    if (selectedImage != null &&
+        existingPhotoPath != null &&
+        existingPhotoPath.isNotEmpty) {
+      try {
+        await firestoreService.deleteClientPhoto(existingPhotoPath);
+      } catch (e) {
+        logger.e('Error deleting old photo: $e');
+      }
+    }
+
+    return newPhotoPath;
   }
 
   @override
