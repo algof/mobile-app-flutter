@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: "Status"),
-                  initialValue: selectedStatus.isEmpty ? null : selectedStatus,
+                  initialValue: (selectedStatus ?? '').isEmpty ? null : selectedStatus,
                   items: ['Lead', 'Prospect', 'Active', 'Finished'].map((
                     status,
                   ) {
@@ -316,7 +316,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          openNoteBox(existingStatus: '');
+          openNoteBox();
           // navigateCameraPreview();
         },
         child: const Icon(Icons.add),
@@ -362,10 +362,10 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         openNoteBox(
                           docId: docId,
-                          existingName: noteName,
-                          existingCompany: noteCompany,
-                          existingPhone: notePhone,
-                          existingStatus: noteStatus,
+                          clientName: noteName,
+                          clientCompany: noteCompany,
+                          clientPhone: notePhone,
+                          clientStatus: noteStatus,
                         );
                       },
                       icon: const Icon(Icons.edit),
