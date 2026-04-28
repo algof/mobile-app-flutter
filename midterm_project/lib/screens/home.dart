@@ -244,11 +244,14 @@ class _HomePageState extends State<HomePage> {
                                 await NotificationService.showPhotoSavedNotification();
                               } catch (e) {
                                 if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error saving photo: $e'),
-                                  ),
+                                await NotificationService.showErrorNotification(
+                                  'Error saving photo: $e',
                                 );
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   SnackBar(
+                                //     content: Text('Error saving photo: $e'),
+                                //   ),
+                                // );
                                 return;
                               }
                             }
@@ -259,11 +262,14 @@ class _HomePageState extends State<HomePage> {
                                 phoneTextController.text.isEmpty ||
                                 (selectedStatus ?? '').isEmpty) {
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Semua field harus diisi'),
-                                ),
+                              await NotificationService.showErrorNotification(
+                                'Semua field harus diisi',
                               );
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   const SnackBar(
+                              //     content: Text('Semua field harus diisi'),
+                              //   ),
+                              // );
                               return;
                             }
 
@@ -502,7 +508,9 @@ class _HomePageState extends State<HomePage> {
                     IconButton(
                       onPressed: () async {
                         firestoreService.deleteClient(docId);
-                        await NotificationService.showClientDeletedNotification(noteName);
+                        await NotificationService.showClientDeletedNotification(
+                          noteName,
+                        );
                       },
                       icon: const Icon(Icons.delete),
                     ),
