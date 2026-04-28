@@ -24,8 +24,8 @@ class _HomePageState extends State<HomePage> {
   final companyTextController = TextEditingController();
   final phoneTextController = TextEditingController();
   String? selectedStatus;
-  File? _selectedImage; // Untuk menyimpan foto baru yang dipilih
-  String? _selectedImagePath; // Untuk menyimpan path foto lama saat edit
+  File? _selectedImage; 
+  String? _selectedImagePath; 
   final ImagePicker _picker = ImagePicker();
   bool _isSaving = false;
 
@@ -347,8 +347,7 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => CameraPreviewScreen(camera: cameras.first),
         ),
       );
-
-      
+     
       if (result != null && result is String) {
         setState(() {
           _selectedImage = File(result);

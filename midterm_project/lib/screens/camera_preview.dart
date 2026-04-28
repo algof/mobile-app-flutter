@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:gal/gal.dart';
-import 'dart:io';
 
 class CameraPreviewScreen extends StatefulWidget {
   final CameraDescription camera;

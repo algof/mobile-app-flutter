@@ -146,36 +146,6 @@ class FirestoreService {
 
     return clients.doc(id).delete();
   }
-
-  // ================= DOCUMENTS =================
-
-  // 🔄 stream documents per client
-  Stream<QuerySnapshot> getDocuments(String clientId) {
-    return documents(
-      clientId,
-    ).orderBy('createdAt', descending: true).snapshots();
-  }
-
-  // ➕ add document
-  Future<void> addDocument(String clientId, String title) {
-    return documents(clientId).add({
-      'title': title,
-      'createdAt': Timestamp.now(),
-      'updatedAt': Timestamp.now(),
-    });
-  }
-
-  // ✏️ update document
-  Future<void> updateDocument(String clientId, String docId, String title) {
-    return documents(
-      clientId,
-    ).doc(docId).update({'title': title, 'updatedAt': Timestamp.now()});
-  }
-
-  // ❌ delete document
-  Future<void> deleteDocument(String clientId, String docId) {
-    return documents(clientId).doc(docId).delete();
-  }
 }
 
 /**
