@@ -47,11 +47,8 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
       await _initializeControllerFuture;
       final image = await _controller.takePicture();
 
-      await Gal.putImage(image.path, album: 'client_photos');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Picture saved to Gallery/client_photos')),
-      );
+      if (!mounted) return;
+      Navigator.pop(context, image.path);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
