@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(initialRoute: 'login', routes: {
+    return MaterialApp(initialRoute: 'home', routes: {
       'home': (context) => const HomeScreen(),
       'camera': (context) => CameraScreen(camera: camera),
     });
