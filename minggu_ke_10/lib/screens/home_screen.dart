@@ -3,14 +3,12 @@ import 'package:camera/camera.dart';
 import 'camera_screen.dart';
 import 'package:minggu_ke_10/services/ocr_service.dart';
 import 'dart:io';
+import 'package:image_cropper/image_cropper.dart';
 
 class HomeScreen extends StatefulWidget {
   final CameraDescription camera;
-  
-  const HomeScreen({
-    super.key,
-    required this.camera,
-  });
+
+  const HomeScreen({super.key, required this.camera});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -20,6 +18,31 @@ class _HomeScreenState extends State<HomeScreen> {
   String _ocrResult = '';
   bool _isProcessing = false;
   final OCRService _ocrService = OCRService();
+
+  Future<CroppedFile?> _cropImage({required String imagePath}) async {
+    File imageFile = File(imagePath);
+    CroppedFile? croppedfile = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      uiSettings: [
+        AndroidUiSettings(
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(minimumAspectRatio: 1.0),
+      ],
+    );
+
+    if (croppedfile != null) {
+      return croppedfile;
+    }
+
+    return null;
+  }
 
   /// Navigate ke camera dan process image
   Future<void> _takePictureAndProcess() async {
@@ -35,12 +58,18 @@ class _HomeScreenState extends State<HomeScreen> {
       // Jika user cancel
       if (imagePath == null) return;
 
+      // Crop image
+      final croppedImage = await _cropImage(imagePath: imagePath);
+
+      // Jika user cancel
+      if (croppedImage == null) return;
+
       // Start processing
-      _processImage(imagePath);
+      _processImage(croppedImage.path);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -52,8 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final result = await _ocrService.recognizeTextFromImage(imgPath: imagePath);
-      
+      final result = await _ocrService.recognizeTextFromImage(
+        imgPath: imagePath,
+      );
+
       setState(() {
         _ocrResult = result.isEmpty ? 'No text detected' : result;
         _isProcessing = false;
@@ -82,7 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Algof OCR: Image to Text', style: TextStyle(color: Colors.white),),
+        title: const Text(
+          'Algof OCR: Image to Text',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         elevation: 0,
@@ -109,10 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.blueAccent,
-                      width: 2,
-                    ),
+                    border: Border.all(color: Colors.blueAccent, width: 2),
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.grey[100],
                   ),
@@ -132,53 +163,46 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         )
                       : _ocrResult.isEmpty
-                          ? Center(
-                              child: Text(
-                                'Hasil OCR akan muncul disini\n\nKlik tombol dibawah untuk mengambil foto',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
+                      ? Center(
+                          child: Text(
+                            'Hasil OCR akan muncul disini\n\nKlik tombol dibawah untuk mengambil foto',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: Colors.grey[600]),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _ocrResult,
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            )
-                          : SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _ocrResult,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
                                       height: 1.6,
                                       color: Colors.black87,
                                     ),
-                                  ),
-                                  // Clear button di bawah text
-                                  if (!_isProcessing)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(top: 20.0),
-                                      child: SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButton.icon(
-                                          onPressed: _clearResult,
-                                          icon: const Icon(Icons.clear),
-                                          label: const Text('Clear Result'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                            foregroundColor: Colors.white,
-                                          ),
-                                        ),
+                              ),
+                              // Clear button di bawah text
+                              if (!_isProcessing)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 20.0),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed: _clearResult,
+                                      icon: const Icon(Icons.clear),
+                                      label: const Text('Clear Result'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -196,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Empty space for balance
               const SizedBox(width: 48),
-              
+
               // Camera Button (di tengah/center)
               ElevatedButton.icon(
                 onPressed: _isProcessing ? null : _takePictureAndProcess,
@@ -211,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              
+
               // Empty space for balance
               const SizedBox(width: 48),
             ],
