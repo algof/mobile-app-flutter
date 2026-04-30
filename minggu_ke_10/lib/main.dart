@@ -1,27 +1,28 @@
-import 'package:minggu_ke_10/screens/home_screen.dart';
-import 'package:minggu_ke_10/screens/camera_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'screens/home_screen.dart';
 
-void main() async {
+late List<CameraDescription> cameras;
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  final cameras = await availableCameras();
-  final firstCamera = cameras.first;
-  
-  runApp(MyApp(camera: firstCamera));
+  cameras = await availableCameras();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final CameraDescription camera;
-
-  const MyApp({super.key, required this.camera});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(initialRoute: 'home', routes: {
-      'home': (context) => const HomeScreen(),
-      'camera': (context) => CameraScreen(camera: camera),
-    });
+    return MaterialApp(
+      title: 'Algof OCR',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        useMaterial3: true,
+      ),
+      home: HomeScreen(camera: cameras.first),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
