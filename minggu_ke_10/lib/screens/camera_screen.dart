@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
@@ -60,6 +62,37 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  Future<void> _pickPicture(ImageSource source) async {
+    try {
+      // Prevent multiple captures
+      if (_isCapturing) return;
+      
+      setState(() {
+        _isCapturing = true;
+      });
+
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source);
+
+      if (!mounted) return;
+      
+      // Return image path ke home_screen
+      if (image != null) {
+        Navigator.pop(context, image.path);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking picture: $e')),
+        );
+      }
+      
+      setState(() {
+        _isCapturing = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,15 +117,41 @@ class _CameraScreenState extends State<CameraScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _isCapturing ? null : _takePicture,
-        backgroundColor: Colors.blueAccent,
-        child: _isCapturing
-            ? const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              )
-            : const Icon(Icons.camera),
+      floatingActionButton: 
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: _isCapturing ? null : _takePicture,
+            backgroundColor: Colors.blueAccent,
+            child: _isCapturing
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Icon(Icons.camera),
+          ),
+          const SizedBox(width: 16),
+          FloatingActionButton(
+            onPressed: _isCapturing ? null : () {_pickPicture(ImageSource.gallery);}, 
+            backgroundColor: Colors.blueAccent,
+            child: _isCapturing
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Icon(Icons.photo_library),
+          ),
+        ],
       ),
+      // FloatingActionButton(
+      //   onPressed: _isCapturing ? null : _takePicture,
+      //   backgroundColor: Colors.blueAccent,
+      //   child: _isCapturing
+      //       ? const CircularProgressIndicator(
+      //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      //         )
+      //       : const Icon(Icons.camera),
+      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

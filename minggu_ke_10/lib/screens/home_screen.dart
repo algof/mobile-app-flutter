@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Algof OCR: Image to Text'),
+        title: const Text('Algof OCR: Image to Text', style: TextStyle(color: Colors.white),),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         elevation: 0,
